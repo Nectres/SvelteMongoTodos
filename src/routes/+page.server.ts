@@ -1,4 +1,3 @@
-import { error } from '@sveltejs/kit';
 import { todos } from '$src/lib/db';
 
 export async function load() {
@@ -10,3 +9,5 @@ export async function load() {
 		todos: todosArray
 	};
 }
+
+export const ssr = false;

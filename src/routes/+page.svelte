@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { authClient } from '$src/lib/auth';
 	import { randomArrayIndex } from '$src/lib/utils';
+	import { onMount } from 'svelte';
 	// import Icon from "svelte-fa"
 
 	export let data: { todos: Todo[] };
 
-	let showLogin = false;
 	let newTodo = '';
+	let username: string | undefined;
 
 	const color = ['orange', 'lightblue', 'coral', 'lightgreen', 'lightyellow', 'lightgray'];
 	const fontColor = ['brown', 'darkblue', 'lightred', 'darkgreen', 'orange', 'black'];
@@ -52,6 +54,21 @@
 		todos[todos.length] = todo as Todo;
 		newTodo = '';
 	}
+
+	async function login() {
+		if (await authClient.isAuthenticated()) {
+			authClient.logout({
+				returnTo: location.origin
+			});
+			alert('Successfully logged out');
+			// console.log(user.sub);
+		}
+		await authClient.loginWithPopup();
+		username = (await authClient.getUser())?.name;
+	}
+	onMount(async () => {
+		if (await authClient.isAuthenticated()) username = (await authClient.getUser())?.name;
+	});
 	// console.log(todos[1].created_on);
 </script>
 
@@ -62,6 +79,18 @@
 </svelte:head>
 
 <div>
+	<div
+		on:click={login}
+		class="absolute px-2 py-1 bg-white cursor-pointer top-4 right-4 rounded-full"
+	>
+		<!-- <i class="fa-solid fa-circle-user"></i> -->
+		{#if username}
+			<span class="text-md font-bold px-4 py-2">{username}</span>
+		{:else}
+			<i class="fa-regular text-3xl fa-circle-user" />
+		{/if}
+		<!-- <i class="fa-solid fa-user-shield"></i> -->
+	</div>
 	<div class="bg-slate-900 text-white pb-8 pt-4 text-center">
 		<h1 class="font-black text-3xl my-4">todos</h1>
 		<p class="text-sm text-gray-200">The best way to manage your day.</p>
